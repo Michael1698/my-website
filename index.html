@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Michael Oyando — Cloud &amp; Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+
+    --bg: #120f0a;
+    --panel: #1c160f;
+    --panel-2: #221b13;
+    --border: #372c1f;
+    --text: #f2ebe0;
+    --text-dim: #ab9c87;
+    --text-faint: #6e6153;
+    --accent: #e8a33d;
+    --accent-dim: rgba(232, 163, 61, 0.14);
+    --amber: #83b78e;
+    --amber-dim: rgba(131, 183, 142, 0.14);
+    --font-sans: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Consolas, monospace;
+  }
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; scroll-padding-top: calc(64px + env(safe-area-inset-top, 0px)); }
+  body{
+    margin:0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  img{ max-width:100%; }
+  a{ color: inherit; }
+
+  .wrap{ max-width: 980px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- status bar ---------- */
+  .statusbar{
+    position: sticky; top:0; z-index: 50;
+    padding-top: env(safe-area-inset-top, 0px);
+    background: rgba(10,14,19,0.88);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+  .statusbar-inner{
+    max-width: 980px; margin: 0 auto; padding: 0 24px;
+    height: 52px; display:flex; align-items:center; justify-content:space-between;
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text-dim);
+  }
+  .status-left{ display:flex; align-items:center; gap:9px; }
+  .dot{
+    width:8px; height:8px; border-radius:50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(75,217,160,0.55);
+    animation: pulse 2.6s ease-out infinite;
+    flex: none;
+  }
+  @keyframes pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(75,217,160,0.5); }
+    70%{ box-shadow: 0 0 0 7px rgba(75,217,160,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(75,217,160,0); }
+  }
+  .status-left span.state{ color: var(--accent); }
+  .status-nav{ display:flex; gap:22px; }
+  .status-nav a{ text-decoration:none; color: var(--text-dim); transition: color .15s; }
+  .status-nav a:hover, .status-nav a:focus-visible{ color: var(--text); }
+  @media (max-width: 620px){ .status-nav{ display:none; } }
+
+  /* ---------- hero ---------- */
+  .hero{ padding: 76px 0 56px; border-bottom: 1px solid var(--border); }
+  .hero-tag{
+    font-family: var(--font-mono); font-size: 13px; color: var(--accent);
+    margin: 0 0 18px;
+  }
+  h1{
+    font-size: clamp(2.3rem, 6vw, 3.6rem);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin: 0 0 10px;
+    font-weight: 700;
+  }
+  .role{
+    font-size: clamp(1.05rem, 2.6vw, 1.3rem);
+    color: var(--text-dim);
+    margin: 0 0 26px;
+    font-weight: 500;
+  }
+  .lede{
+    max-width: 62ch;
+    color: var(--text-dim);
+    font-size: 1.02rem;
+    margin: 0 0 34px;
+  }
+  .chip-row{ display:flex; flex-wrap:wrap; gap:10px; }
+  .chip{
+    display:flex; align-items:center; gap:8px;
+    border: 1px solid var(--border);
+    background: var(--panel);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+  .chip .dot{ animation:none; box-shadow:none; width:6px; height:6px; }
+  .chip b{ color: var(--text); font-weight: 600; }
+
+  /* ---------- section scaffolding ---------- */
+  section{ padding: 60px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type{ border-bottom: none; }
+  .sec-head{
+    display:flex; align-items:baseline; gap:14px;
+    margin-bottom: 34px;
+  }
+  .sec-head .idx{
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--text-faint);
+  }
+  .sec-head h2{
+    font-size: 1.5rem; margin:0; font-weight: 600; letter-spacing: -0.01em;
+  }
+
+  /* ---------- experience: deployment log ---------- */
+  .log{ position:relative; }
+  .log::before{
+    content:''; position:absolute; left: 7px; top: 8px; bottom: 8px;
+    width: 1px; background: var(--border);
+  }
+  .log-entry{ position:relative; padding: 0 0 40px 38px; }
+  .log-entry:last-child{ padding-bottom: 0; }
+  .log-entry::before{
+    content:''; position:absolute; left:1px; top:6px;
+    width:13px; height:13px; border-radius:50%;
+    background: var(--bg); border: 2px solid var(--accent);
+  }
+  .log-entry.past::before{ border-color: var(--text-faint); }
+  .log-time{
+    font-family: var(--font-mono); font-size: 12.5px; color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .log-entry.past .log-time{ color: var(--text-faint); }
+  .log-role{ font-size: 1.1rem; font-weight: 600; margin: 0 0 2px; }
+  .log-org{ color: var(--text-dim); font-size: 0.95rem; margin: 0 0 14px; }
+  .log-entry ul{ margin: 0; padding-left: 18px; color: var(--text-dim); }
+  .log-entry li{ margin-bottom: 7px; font-size: 0.96rem; }
+
+  /* ---------- skills: service grid ---------- */
+  .svc-grid{
+    display:grid; grid-template-columns: repeat(2, 1fr); gap: 14px;
+  }
+  @media (max-width: 640px){ .svc-grid{ grid-template-columns: 1fr; } }
+  .svc-card{
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 20px 22px;
+  }
+  .svc-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom: 14px; }
+  .svc-name{ font-weight: 600; font-size: 0.98rem; }
+  .svc-state{
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+    display:flex; align-items:center; gap:6px;
+  }
+  .svc-card ul{ margin:0; padding:0; list-style:none; }
+  .svc-card li{
+    font-size: 0.9rem; color: var(--text-dim);
+    padding: 5px 0; border-top: 1px solid var(--border);
+  }
+  .svc-card li:first-child{ border-top:none; }
+
+  /* ---------- project: deployment case ---------- */
+  .case{
+    background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 28px 30px;
+  }
+  .case-title{ font-size: 1.15rem; font-weight: 600; margin: 0 0 6px; }
+  .case-sub{ color: var(--text-dim); font-size: 0.95rem; margin: 0 0 22px; }
+  .case-steps{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 10px 24px; margin:0; padding:0; list-style:none; }
+  @media (max-width: 640px){ .case-steps{ grid-template-columns: 1fr; } }
+  .case-steps li{
+    font-size: 0.92rem; color: var(--text-dim);
+    padding-left: 20px; position:relative;
+  }
+  .case-steps li::before{
+    content:'›'; position:absolute; left:0; color: var(--accent); font-family: var(--font-mono);
+  }
+  .case-tags{ display:flex; flex-wrap:wrap; gap:8px; margin-top: 22px; }
+  .tag{
+    font-family: var(--font-mono); font-size: 11px; color: var(--amber);
+    background: var(--amber-dim); border-radius: 5px; padding: 4px 9px;
+  }
+
+  /* ---------- education ---------- */
+  .edu-row{
+    display:flex; justify-content:space-between; align-items: baseline;
+    gap: 20px; padding: 16px 0; border-top: 1px solid var(--border);
+  }
+  .edu-row:first-child{ border-top:none; }
+  .edu-inst{ font-weight: 600; font-size: 0.98rem; }
+  .edu-deg{ color: var(--text-dim); font-size: 0.9rem; margin-top: 2px; }
+  .edu-time{ font-family: var(--font-mono); font-size: 12px; color: var(--text-faint); white-space: nowrap; }
+
+  /* ---------- footer ---------- */
+  footer{ padding: 50px 0 calc(50px + env(safe-area-inset-bottom, 0px)); }
+  .foot-grid{ display:grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 34px; }
+  @media (max-width: 700px){ .foot-grid{ grid-template-columns: 1fr; gap: 28px; } }
+  .foot-label{
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-faint);
+    margin: 0 0 12px;
+  }
+  .foot-block a{ text-decoration:none; }
+  .foot-block a:hover{ color: var(--accent); }
+  .foot-line{ font-size: 0.92rem; color: var(--text-dim); margin: 0 0 6px; }
+  .foot-note{
+    margin-top: 44px; padding-top: 22px; border-top: 1px solid var(--border);
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--text-faint);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+</style>
+</head>
+<body>
+
+<div class="statusbar">
+  <div class="statusbar-inner">
+    <div class="status-left"><span class="dot"></span>STATUS: <span class="state">&nbsp;OPERATIONAL</span></div>
+    <nav class="status-nav">
+      <a href="#experience">experience</a>
+      <a href="#skills">skills</a>
+      <a href="#project">project</a>
+      <a href="#education">education</a>
+      <a href="#contact">contact</a>
+    </nav>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <p class="hero-tag">cloud &amp; infrastructure — kisumu, kenya</p>
+    <h1>Michael Ochieng Oyando</h1>
+    <p class="role">Entry-level Cloud &amp; IT Support Engineer</p>
+    <p class="lede">Computer Technology graduate who builds and troubleshoots cloud infrastructure on AWS and Azure, and keeps Linux servers, networks and web stacks running underneath it. Looking to grow into a cloud solutions role, one deployment at a time.</p>
+    <div class="chip-row">
+      <span class="chip"><span class="dot"></span><b>AWS</b>&nbsp;EC2 · S3 · ELB</span>
+      <span class="chip"><span class="dot"></span><b>Azure</b>&nbsp;VMs · VNet · NSG</span>
+      <span class="chip"><span class="dot"></span><b>Linux</b>&nbsp;Ubuntu · Nginx</span>
+      <span class="chip"><span class="dot"></span><b>Python</b>&nbsp;Flask · Gunicorn</span>
+    </div>
+  </header>
+
+  <section id="experience">
+    <div class="sec-head"><span class="idx">log</span><h2>Work Experience</h2></div>
+    <div class="log">
+      <div class="log-entry">
+        <div class="log-time">SEP 2026 — PRESENT</div>
+        <h3 class="log-role">Implementation &amp; Support Officer</h3>
+        <p class="log-org">Smart Applications, Kisumu</p>
+        <ul>
+          <li>Plan, coordinate and execute Hospital solution implementations against project plans and regional priorities.</li>
+          <li>Handle hands-on deployment support: installation, configuration, testing and system validation at client sites.</li>
+          <li>Run user training sessions so clients fully adopt and use Smart Hospital solutions.</li>
+          <li>First point of contact for client support, troubleshooting issues and escalating technical challenges.</li>
+          <li>Integrate Smart modules — Smart EDI, Smart Clinical Master List, Smart Analytics — during deployments.</li>
+          <li>Document project activity, site configurations and resolutions; report progress to the Regional Lead.</li>
+        </ul>
+      </div>
+      <div class="log-entry past">
+        <div class="log-time">2023</div>
+        <h3 class="log-role">IT Intern</h3>
+        <p class="log-org">Aga Khan Hospital, Kisumu</p>
+        <ul>
+          <li>Gave technical support on the hospital's electronic medical records system, plus software and hardware issues for staff.</li>
+          <li>Helped install and maintain network infrastructure across servers, workstations and peripherals.</li>
+          <li>Handled backup and data retrieval to keep patient and operational data safe and compliant.</li>
+          <li>Worked with the IT team on system updates and security patching.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="sec-head"><span class="idx">services</span><h2>Technical Skills</h2></div>
+    <div class="svc-grid">
+      <div class="svc-card">
+        <div class="svc-head"><span class="svc-name">Amazon Web Services</span><span class="svc-state"><span class="dot" style="animation:none;box-shadow:none;width:6px;height:6px;"></span>active</span></div>
+        <ul>
+          <li>EC2 &amp; Instance Connect / SSH</li>
+          <li>Elastic IP &amp; Elastic Load Balancing</li>
+          <li>Security Groups</li>
+          <li>S3 concepts</li>
+          <li>Cloud networking fundamentals</li>
+        </ul>
+      </div>
+      <div class="svc-card">
+        <div class="svc-head"><span class="svc-name">Microsoft Azure</span><span class="svc-state"><span class="dot" style="animation:none;box-shadow:none;width:6px;height:6px;"></span>active</span></div>
+        <ul>
+          <li>Azure Virtual Machines</li>
+          <li>Virtual Networks (VNet) &amp; NSGs</li>
+          <li>Linux VM administration</li>
+          <li>Azure CLI fundamentals</li>
+        </ul>
+      </div>
+      <div class="svc-card">
+        <div class="svc-head"><span class="svc-name">Linux &amp; Systems</span><span class="svc-state"><span class="dot" style="animation:none;box-shadow:none;width:6px;height:6px;"></span>active</span></div>
+        <ul>
+          <li>Ubuntu Linux &amp; SSH</li>
+          <li>Command line &amp; file management</li>
+          <li>Package management</li>
+          <li>Processes &amp; services</li>
+        </ul>
+      </div>
+      <div class="svc-card">
+        <div class="svc-head"><span class="svc-name">Web Servers &amp; Networking</span><span class="svc-state"><span class="dot" style="animation:none;box-shadow:none;width:6px;height:6px;"></span>active</span></div>
+        <ul>
+          <li>Nginx &amp; Apache fundamentals</li>
+          <li>Reverse proxy &amp; port mapping</li>
+          <li>HTTP/HTTPS, TCP/IP, DNS fundamentals</li>
+          <li>Load balancing &amp; network troubleshooting</li>
+        </ul>
+      </div>
+      <div class="svc-card">
+        <div class="svc-head"><span class="svc-name">Programming</span><span class="svc-state"><span class="dot" style="animation:none;box-shadow:none;width:6px;height:6px;"></span>active</span></div>
+        <ul>
+          <li>Python</li>
+          <li>Flask &amp; Gunicorn</li>
+          <li>REST / web application fundamentals</li>
+          <li>Environment variables &amp; virtualenvs</li>
+        </ul>
+      </div>
+      <div class="svc-card">
+        <div class="svc-head"><span class="svc-name">General IT</span><span class="svc-state"><span class="dot" style="animation:none;box-shadow:none;width:6px;height:6px;"></span>active</span></div>
+        <ul>
+          <li>Hardware &amp; software repair</li>
+          <li>System &amp; network security</li>
+          <li>System install, implementation &amp; config</li>
+          <li>IT support</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="project">
+    <div class="sec-head"><span class="idx">case</span><h2>Featured Project</h2></div>
+    <div class="case">
+      <h3 class="case-title">Static website hosted on AWS EC2</h3>
+      <p class="case-sub">Deployed and configured a Linux-based web server on EC2 and made it reachable over the public internet.</p>
+      <ul class="case-steps">
+        <li>Created and managed an EC2 instance</li>
+        <li>Connected to the server over SSH</li>
+        <li>Installed and configured Nginx</li>
+        <li>Hosted a static site on the instance</li>
+        <li>Set network access with Security Groups</li>
+        <li>Worked with HTTP &amp; web-server ports</li>
+        <li>Configured and tested Elastic IP behaviour</li>
+        <li>Troubleshot connectivity &amp; accessibility</li>
+      </ul>
+      <div class="case-tags">
+        <span class="tag">EC2</span>
+        <span class="tag">Nginx</span>
+        <span class="tag">Security Groups</span>
+        <span class="tag">Elastic IP</span>
+        <span class="tag">SSH</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="sec-head"><span class="idx">record</span><h2>Education</h2></div>
+    <div>
+      <div class="edu-row">
+        <div>
+          <div class="edu-inst">Maseno University</div>
+          <div class="edu-deg">BSc Computer Technology</div>
+        </div>
+        <div class="edu-time">2021 – 2026</div>
+      </div>
+      <div class="edu-row">
+        <div>
+          <div class="edu-inst">Sigalame High School</div>
+          <div class="edu-deg">Kenya Certificate of Secondary Education</div>
+        </div>
+        <div class="edu-time">2016 – 2020</div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="foot-grid">
+      <div class="foot-block">
+        <p class="foot-label">get in touch</p>
+        <p class="foot-line"><a href="mailto:mochieng191@gmail.com">mochieng191@gmail.com</a></p>
+        <p class="foot-line"><a href="tel:+254793011782">+254 793 011 782</a></p>
+        <p class="foot-line">P.O. Box Kisumu, Ahero 16-40101, Kenya</p>
+      </div>
+      <div class="foot-block">
+        <p class="foot-label">languages</p>
+        <p class="foot-line">English</p>
+        <p class="foot-line">Kiswahili</p>
+      </div>
+      <div class="foot-block">
+        <p class="foot-label">references</p>
+        <p class="foot-line">Dr. Calvin Otieno<br>Dean, School of Computing &amp; Informatics, Maseno University</p>
+        <p class="foot-line">Paul Oduor Agutu<br>Regional Branch Manager, Smart Applications</p>
+      </div>
+    </div>
+    <div class="foot-note">
+      <span>michael oyando — cloud &amp; infrastructure</span>
+      <span>last deployed 2026</span>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
