@@ -1,0 +1,5 @@
+      - name: Upload to S3
+        run: aws s3 sync . s3://mikey254 --exclude ".git/*" --exclude ".github/*"
+
+      - name: Invalidate CloudFront cache
+        run: aws cloudfront create-invalidation --distribution-id E3N0RU0NYAD631 --paths "/*"
